@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#181818">
+    <title>2019-nCoV Visualization</title>
+    <link href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap" rel="stylesheet">
+    <link href="css/base.css" rel="stylesheet">
+</head>
+
+<body>
+
+
+    <div class="container">
+        <svg-frame></svg-frame>
+        <h1>Novel<br />Coronavirus<br />2019<br />Visualization<br />-</h1>
+    </div>
+
+
+    <script src="https://unpkg.com/d3@5" charset="utf-8"></script>
+    <script src="https://unpkg.com/topojson-client@3"></script>
+    <script>
+
+        const altSubstr = str => {
+            if (str.substr(0, 2) == '张家') return str.substr(0, 3)
+            return str.substr(0, 2)
+        }
+
+        fetch('data/china-proj.topo.json').then(res => res.json()).then(china => {
+            let path = d3.geoPath()
+            console.log("Geo Data", china)
+
+            let data = {}
+            fetch('data/infection.json').then(res => res.json()).then(raw => {
+
+                let maxInfection = 0
+                raw.data.list.forEach(prov => {
+                    let special = { "北京": 0, "天津": 0, "重庆": 0, "上海": 0, "台湾": 1, "香港": 1, "澳门": 1 }
+                    if (prov.name in special) {
+                        data[prov.name] = {
+                            conNum: prov.value,
+                            used: false
+                        }
+                    } else {
+                        prov.city.forEach(city => {
+                            let name = city.name
+                            data[altSubstr(name)] = {
+                                conNum: city.conNum,
+                                used: false
+                            }
+                            if (city.conNum > maxInfection) maxInfection = city.conNum
+                        })
+                    }
+                })
+
+                console.log("Infection Data from Sina", data)
+
+                fetch('data/2010-census.csv').then(res => res.text()).then(cens => {
+                    let population = new Map(d3.csvParse(cens, ({ city, population }) => [altSubstr(city), population]))
+                    console.log("Population Data from Census 2010", population)
+
+                    paint = d3.scalePow()
+                        .interpolate(() => d3.interpolateViridis)
+                        .exponent(0.4)
+                        .domain([1, maxInfection])
+                    // .range(["#222", "yellow"])
+
+                    paint2 = d3.scaleSequential(d3.interpolateViridis).domain([0, maxInfection])
+
+                    d3.select("svg-frame")
+                        .append("svg")
+                        .attr("viewBox", [0, 0, 975, 910])
+                        .append("g")
+                        .selectAll("path")
+                        .data(topojson.feature(china, china.objects.provinces).features)
+                        .join("path")
+                        .attr("fill", d => {
+                            let cut = altSubstr(d.properties.NAME)
+                            if (cut in data) {
+                                data[cut].used = true
+                                return paint(data[cut].conNum / population.get(cut) * 1000)
+                            }
+                            return '#222'
+                        })
+                        .attr("d", path)
+                        .append("title")
+
+                    for (let city in data) {
+                        if (!data[city].used) console.warn("Unused city", city)
+                    }
+
+                })
+
+            })
+        })
+
+    </script>
+</body>

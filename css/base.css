@@ -1,0 +1,31 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: #181818;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #eee;
+}
+
+svg {
+    margin: 20px;
+}
+svg-frame {
+    left: 0;
+    right: 0px;
+    position: absolute;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 25px;
+    position: relative;
+}
+
+h1 {
+    line-height: 0.9;
+}

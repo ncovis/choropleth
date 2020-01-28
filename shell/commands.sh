@@ -1,0 +1,1 @@
+geoproject "d3.geoAlbers().rotate([-105, -30]).fitSize([960, 960], d)" < china.geo.json > china-proj.geo.json && geo2svg -w 960 -h 960 < china-proj.geo.json > china-proj.svg
