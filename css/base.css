@@ -2,6 +2,10 @@
     box-sizing: border-box;
 }
 
+*::selection {
+    background-color: #000;
+}
+
 body {
     background: #181818;
     font-family: 'Poppins', sans-serif;
@@ -14,12 +18,16 @@ body {
 
 a, .clickable {
     color: inherit;
-    transition: all .2s;
+    transition: all .12s;
     cursor: pointer;
 }
 
 a:hover, .clickable:hover {
     opacity: 0.7;
+}
+
+path.clickable:hover, path.clickable:active {
+    fill: white;
 }
 
 svg {
@@ -32,7 +40,6 @@ svg-frame {
     right: 0;
     margin: 0 auto;
     position: absolute;
-    z-index: 1;
     align-self: center;
 }
 
@@ -46,6 +53,7 @@ svg-frame {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    pointer-events: none;
 }
 
 .title {
@@ -77,6 +85,9 @@ svg-frame {
 .sidebar.left {
     align-items: flex-start;
     justify-content: space-between;
+}
+.sidebar.left * {
+    pointer-events: all;
 }
 .sidebar.middle {
     align-items: center;
