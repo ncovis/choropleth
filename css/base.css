@@ -8,6 +8,8 @@ body {
     margin: 0;
     padding: 0;
     color: #eee;
+    display: flex;
+    flex-direction: row;
 }
 
 a, .clickable {
@@ -31,9 +33,11 @@ svg-frame {
     margin: 0 auto;
     position: absolute;
     z-index: 1;
+    align-self: center;
 }
 
 .container {
+    flex: 1;
     margin: 0 auto;
     position: relative;
     height: 100vh;
@@ -78,11 +82,12 @@ svg-frame {
     align-items: center;
     justify-content: flex-start;
 }
-.sidebar.middle * {
-    display: block;
+.focus {
+    text-align: right;
+    color: #666;
+    display: flex;
+    flex-direction: column;
 }
-
-
 .rate {
     font-size: 30px;
 }
@@ -102,7 +107,6 @@ svg-frame {
 .grad-bar {
     height: 5px;
     width: 180px;
-    background-color: red;
 }
 
 .tooltip { 

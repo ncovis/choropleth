@@ -46,14 +46,10 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
             let paint = d3.scalePow()
                 .interpolate(() => d3.interpolateInferno)
                 .exponent(0.3)
-                .domain([0, 500])
-            // .range(["#222", "yellow"])
+                .domain([0, 1500])
 
             document.querySelector('.grad-bar').style.background =
                 `linear-gradient(to right,${d3.interpolateInferno(0.2)},${d3.interpolateInferno(0.5)},${d3.interpolateInferno(0.9)})`
-
-            let tooltip = d3.select("body").append("div")
-                .attr("class", "tooltip")
 
             d3.select("svg-frame")
                 .append("svg")
