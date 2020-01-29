@@ -52,6 +52,9 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
             document.querySelector('.grad-bar').style.background =
                 `linear-gradient(to right,${d3.interpolateInferno(0.2)},${d3.interpolateInferno(0.5)},${d3.interpolateInferno(0.9)})`
 
+            let tooltip = d3.select("body").append("div")
+                .attr("class", "tooltip")
+
             d3.select("svg-frame")
                 .append("svg")
                 .attr("viewBox", [0, 0, 875, 910])
@@ -59,6 +62,7 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                 .selectAll("path")
                 .data(topojson.feature(china, china.objects.provinces).features)
                 .join("path")
+                .attr("class", "clickable")
                 .attr("fill", d => {
                     let cut = altSubstr(d.properties.NAME)
                     if (cut in data) {
@@ -68,7 +72,17 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                     return '#222'
                 })
                 .attr("d", path)
-                .append("title")
+                .on("click", d => {
+                    let cut = altSubstr(d.properties.NAME)
+                    document.querySelector('.city-name').innerText = d.properties.NAME
+                    if (cut in data) {
+                        let n = data[cut].conNum / population.get(cut)
+                        document.querySelector('.rate').innerText =
+                            `${n.toFixed(4)}`
+                    }
+                    else document.querySelector('.rate').innerText = 0
+                });
+
 
             for (let city in data) {
                 if (!data[city].used) console.warn("Unused city", city)
