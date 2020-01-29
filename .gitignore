@@ -1,2 +1,4 @@
 /node_modules
 /unuploaded
+/.cache
+/dist
