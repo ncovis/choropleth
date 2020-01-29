@@ -84,6 +84,15 @@ svg-frame {
     width: 100px;
 }
 
+.legend {
+    margin-top: 60px;
+}
+.grad-bar {
+    height: 5px;
+    width: 180px;
+    background-color: red;
+}
+
 @media screen and (max-width: 701px) {
     svg-frame {
         margin-top: 100px;

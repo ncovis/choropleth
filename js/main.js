@@ -7,8 +7,8 @@ const altSubstr = str => {
 }
 
 import fetchJsonp from 'fetch-jsonp'
-let china = require('./data/china-proj.topo.json')
-let censUrl = require('./data/2010-census.csv')
+let china = require('./../data/china-proj.topo.json')
+let censUrl = require('./../data/2010-census.csv')
 
 let data = {}
 let maxInfection = 0
@@ -19,7 +19,6 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
         return response.json()
     }).then(function (raw) {
         console.log("Infection Data from Sina", raw)
-        document.querySelector('#time').innerText = raw.data.times
         raw.data.list.forEach(prov => {
             let special = { "北京": 0, "天津": 0, "重庆": 0, "上海": 0, "台湾": 1, "香港": 1, "澳门": 1 }
             if (prov.name in special) {
@@ -50,7 +49,8 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                 .domain([0, 500])
             // .range(["#222", "yellow"])
 
-            let paint2 = d3.scaleSequential(d3.interpolateViridis).domain([0, maxInfection])
+            document.querySelector('.grad-bar').style.background =
+                `linear-gradient(to right,${d3.interpolateInferno(0.2)},${d3.interpolateInferno(0.5)},${d3.interpolateInferno(0.9)})`
 
             d3.select("svg-frame")
                 .append("svg")
