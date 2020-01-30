@@ -8,19 +8,29 @@ const altSubstr = str => {
 
 import fetchJsonp from 'fetch-jsonp'
 let china = require('./../data/china-proj.topo.json')
+let topoData = topojson.feature(china, china.objects.provinces).features
 let censUrl = require('./../data/2010-census.csv')
+
+console.log("Geographical Data", topoData)
 
 let data = {}
 let maxInfection = 0
 let path = d3.geoPath()
 
 fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
+
     .then(function (response) {
         return response.json()
     }).then(function (raw) {
         console.log("Infection Data from Sina", raw)
         raw.data.list.forEach(prov => {
             let special = { "北京": 0, "天津": 0, "重庆": 0, "上海": 0, "台湾": 1, "香港": 1, "澳门": 1 }
+            if (prov.name == '西藏' && prov.city.length <= 1) { // Representing that Sina has not changed Tibet to city-scale data yet
+                data['拉萨'] = {
+                    conNum: prov.value,
+                    used: false
+                }
+            }
             if (prov.name in special) {
                 data[prov.name] = {
                     conNum: prov.value,
@@ -37,57 +47,127 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                 })
             }
         })
-
         fetch(censUrl).then(res => res.text()).then(cens => {
+
+            const render = (method) => {
+
+                d3.select("svg-frame").html("")
+
+                let { formula, style, properties } = method
+                d3.select()
+                d3.select('.grad-bar').style('background', `linear-gradient(to right,${style.interpolation(0.2)},${style.interpolation(0.5)},${style.interpolation(0.9)})`)
+
+                d3.select('.title .light').text(properties.title)
+                d3.select('.desc').text(properties.desc)
+
+                d3.select("svg-frame")
+                    .append("svg")
+                    .attr("viewBox", [0, 0, 875, 910])
+                    .append("g")
+                    .selectAll("path")
+                    .data(topoData)
+                    .join("path")
+                    .attr("class", "clickable")
+                    .attr("fill", d => {
+                        let cut = altSubstr(d.properties.NAME)
+                        if (cut in data) {
+                            data[cut].used = true
+                            return style.paint(formula(cut, d.properties))
+                        }
+                        return '#222'
+                    })
+                    .attr("d", path)
+                    .on("mouseover", d => {
+                        let cut = altSubstr(d.properties.NAME)
+                        d3.select('.city-name').text(d.properties.NAME)
+                        if (cut in data) {
+                            d3.select('.rate').text(formula(cut, d.properties).toFixed(method.properties.toFixed))
+                        }
+                        else d3.select('.rate').text(0)
+                    })
+                    .on("mouseout", d => {
+                        d3.select(".rate").html("")
+                        d3.select(".city-name").html("")
+                    })
+
+                for (let city in data) {
+                    if (!data[city].used) console.warn("Unused city", city)
+                }
+            }
 
             let population = new Map(d3.csvParse(cens, ({ city, population }) => [altSubstr(city), population]))
             console.log("Population Data from Census 2010", population)
 
-            let paint = d3.scalePow()
-                .interpolate(() => d3.interpolateInferno)
-                .exponent(0.3)
-                .domain([0, 1500])
-
-            document.querySelector('.grad-bar').style.background =
-                `linear-gradient(to right,${d3.interpolateInferno(0.2)},${d3.interpolateInferno(0.5)},${d3.interpolateInferno(0.9)})`
-
-            d3.select("svg-frame")
-                .append("svg")
-                .attr("viewBox", [0, 0, 875, 910])
-                .append("g")
-                .selectAll("path")
-                .data(topojson.feature(china, china.objects.provinces).features)
-                .join("path")
-                .attr("class", "clickable")
-                .attr("fill", d => {
-                    let cut = altSubstr(d.properties.NAME)
-                    if (cut in data) {
-                        data[cut].used = true
-                        return paint(data[cut].conNum / population.get(cut) * 1000)
+            let methods = {
+                ratio: {
+                    formula: (cut, dProp) => data[cut].conNum / population.get(cut),
+                    style: {
+                        paint: d3.scalePow()
+                            .interpolate(() => d3.interpolateInferno)
+                            .exponent(0.3)
+                            .domain([0, 1.5]),
+                        interpolation: d3.interpolateInferno
+                    },
+                    properties: {
+                        title: "Infection Ratio",
+                        abbv: "Ratio",
+                        desc: "Infections per 10,000 People",
+                        toFixed: 4
                     }
-                    return '#222'
-                })
-                .attr("d", path)
-                .on("click", d => {
-                    let cut = altSubstr(d.properties.NAME)
-                    document.querySelector('.city-name').innerText = d.properties.NAME
-                    if (cut in data) {
-                        let n = data[cut].conNum / population.get(cut)
-                        document.querySelector('.rate').innerText =
-                            `${n.toFixed(4)}`
+                },
+                density: {
+                    formula: (cut, dProp) => data[cut].conNum / dProp.Shape_Area,
+                    style: {
+                        paint: d3.scalePow()
+                            .interpolate(() => d3.interpolateViridis)
+                            .exponent(0.3)
+                            .domain([0, 1500]),
+                        interpolation: d3.interpolateViridis
+                    },
+                    properties: {
+                        title: "Infection Density",
+                        abbv: "Density",
+                        desc: "Infections per 10,000 km²",
+                        toFixed: 4
                     }
-                    else document.querySelector('.rate').innerText = 0
-                });
-
-
-            for (let city in data) {
-                if (!data[city].used) console.warn("Unused city", city)
+                },
+                absolute: {
+                    formula: (cut, dProp) => +data[cut].conNum,
+                    style: {
+                        paint: d3.scalePow()
+                            .interpolate(() => d3.interpolateCividis)
+                            .exponent(0.3)
+                            .domain([0, 1500]),
+                        interpolation: d3.interpolateCividis
+                    },
+                    properties: {
+                        title: "Infection Absolute",
+                        abbv: "Absolute",
+                        desc: "Infections Count",
+                        toFixed: 0
+                    }
+                },
             }
 
+            for (let method in methods) {
+                d3.select('.methods')
+                    .append('input')
+                    .attr('type', 'radio')
+                    .attr('name', 'method-ratio')
+                    .attr('id', method)
+                    .on('click', () => render(methods[method]))
+
+                d3.select('.methods')
+                    .append('label')
+                    .attr('for', method)
+                    .attr('class', 'clickable')
+                    .text(methods[method].properties.abbv)
+            }
+
+            // Fire the first render
+            document.querySelector('label[for="ratio"]').click()
+
         })
-
-
-
     }).catch(function (ex) {
         console.log('parsing failed', ex)
     })
