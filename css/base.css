@@ -174,7 +174,10 @@ input[type="radio"]:checked + label {
 }
 
 input[type="radio"] + label:before {
-    content: "▶ "
+    content: "▸";
+    margin-right: 5px;
+    display: inline-block;
+    transform: scale(1.5);
 }
 
 @media screen and (max-width: 701px) {
