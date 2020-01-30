@@ -1,6 +1,6 @@
 # nCoVis Choropleth
 
-## About
+### About
 
 Visualization of the Novel Coronavirus outbreak in Wuhan, China. 
 
@@ -14,16 +14,19 @@ Note that this project is still in the experimental stage. Additional modules ar
 
 ![Preview](assets/preview-3.jpg "Preview")
 
-## Start Building
+### Start Building
 
 ```sh
 # Development
+
 npm i
 npm install -g parcel-bundler
 parcel index.html
 
 # Production Build & Deployment
-parcel build index.html --public-url "." # For publishing on github pages, relative path configuration is required.
+
+parcel build index.html --public-url "."
+# For publishing on github pages, relative path configuration is required.
 git subtree push --prefix dist origin gh-pages
 ```
 
