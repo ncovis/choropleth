@@ -18,6 +18,11 @@ const altSubstr = str => {
     return str.substr(0, 2)
 }
 
+document.body.addEventListener("mousemove", (e) => {
+    document.body.style.backgroundPositionX = +e.offsetX/10.0 + "px";
+    document.body.style.backgroundPositionY = +e.offsetY/10.0 + "px";
+});
+
 fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
 
     .then(function (response) {
