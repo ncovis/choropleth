@@ -8,7 +8,7 @@
 
 body {
     background-color: #181818;
-    background-image: url('../assets/bg.svg');
+    background-image: url('/bg.d65203e2.svg');
     font-family: 'Poppins', sans-serif;
     margin: 0;
     padding: 0;
@@ -191,3 +191,5 @@ input[type="radio"] + label:before {
         font-size: 11px;
     }
 }
+
+/*# sourceMappingURL=/base.98fd6c19.css.map */
