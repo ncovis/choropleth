@@ -6,12 +6,15 @@
     background-color: #000;
 }
 
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
 body {
     background-color: #181818;
     background-image: url('../assets/bg.svg');
-    font-family: 'Poppins', sans-serif;
-    margin: 0;
-    padding: 0;
+    font-family: 'Poppins', '等线', sans-serif;
     color: #eee;
     display: flex;
     flex-direction: row;
@@ -115,10 +118,14 @@ svg-frame {
 .focus {
     text-align: right;
     display: flex;
+    align-items: flex-end;
     flex-direction: column;
 }
 .rate {
-    font-size: 30px;
+    font-size: 50px;
+}
+.desc {
+    width: 130px;
 }
 .sidebar.right {
     align-items: flex-end;
@@ -131,7 +138,7 @@ svg-frame {
     display: flex;
     flex-direction: column;
     font-size: 30px;
-    line-height: 1.2;
+    line-height: 1.35;
     text-transform: uppercase;
 }
 
@@ -186,7 +193,7 @@ input[type="radio"] + label:before {
     }
 }
 
-@media screen and (max-height: 960px) {
+@media screen and (max-height: 955px) {
     .title {
         font-size: 35px;
     }

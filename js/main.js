@@ -62,7 +62,7 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
 
                 const resetRegion = () => {
                     d3.select(".rate").html(dataDefault.toFixed(method.properties.toFixed))
-                    d3.select(".city-name").html("China")
+                    d3.select(".city-name").html("China / 全国")
                     d3.select('.grad-bar').style('background', `linear-gradient(to right,${style.interpolation(0.2)},${style.interpolation(0.5)},${style.interpolation(0.9)})`)
                 }
                 resetRegion()
@@ -131,8 +131,8 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                     },
                     properties: {
                         title: "Infection Ratio",
-                        abbv: "Ratio",
-                        desc: "Infections per 10,000 People",
+                        abbv: "感染比例 Ratio",
+                        desc: "Infections per 10,000 People / 每万人感染数",
                         toFixed: 4
                     }
                 },
@@ -148,8 +148,8 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                     },
                     properties: {
                         title: "Infection Density",
-                        abbv: "Density",
-                        desc: "Infections per 10,000 km²",
+                        abbv: "密度 Density",
+                        desc: "Infections per 10,000 km² / 每 km² 感染数",
                         toFixed: 4
                     }
                 },
@@ -165,8 +165,8 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                     },
                     properties: {
                         title: "Total Infections",
-                        abbv: "Absolute",
-                        desc: "Number of Infected People",
+                        abbv: "人数 Absolute",
+                        desc: "Number of Infected People / 感染人数",
                         toFixed: 0
                     }
                 },
