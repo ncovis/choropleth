@@ -19,8 +19,8 @@ const altSubstr = str => {
 }
 
 document.body.addEventListener("mousemove", (e) => {
-    document.body.style.backgroundPositionX = +e.offsetX/10.0 + "px";
-    document.body.style.backgroundPositionY = +e.offsetY/10.0 + "px";
+    d3.select('body').style('background-position-x', +e.offsetX/10.0 + "px")
+    d3.select('body').style('background-position-y', +e.offsetY/10.0 + "px")
 });
 
 fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
@@ -92,11 +92,18 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                         d3.select('.city-name').text(d.properties.NAME)
                         if (cut in data) {
                             d3.select('.rate').text(formula(cut, d.properties).toFixed(method.properties.toFixed))
-                            d3.select('.grad-bar').style('background', style.paint(formula(cut, d.properties)))
                         }
                         else {
                             d3.select('.rate').text(0)
-                            d3.select('.grad-bar').style('background', '#222')
+                        }
+                    })
+                    .on("click", d => {
+                        let cut = altSubstr(d.properties.NAME)
+                        if (cut in data) {
+                            d3.select('body').style('background-color', style.paint(formula(cut, d.properties)))
+                        }
+                        else {
+                            d3.select('body').style('background-color', "")
                         }
                     })
                     .on("mouseout", d => {
