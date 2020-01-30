@@ -200,4 +200,10 @@ input[type="radio"] + label:before {
     .title-s {
         font-size: 11px;
     }
+    .rate {
+        font-size: 30px;
+    }
+    .methods {
+        font-size: 22px;
+    }
 }
