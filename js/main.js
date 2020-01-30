@@ -1,12 +1,5 @@
-const altSubstr = str => {
-    if (str.substr(0, 2) == '张家') return str.substr(0, 3)
-    if (str.substr(0, 3) == '公主岭') return "四平"
-    if (str.substr(0, 2) == '第七') return "克拉"
-    if (str.substr(0, 2) == '第八') return "石河"
-    return str.substr(0, 2)
-}
-
 import fetchJsonp from 'fetch-jsonp'
+
 let china = require('./../data/china-proj.topo.json')
 let topoData = topojson.feature(china, china.objects.provinces).features
 let censUrl = require('./../data/2010-census.csv')
@@ -16,6 +9,14 @@ console.log("Geographical Data", topoData)
 let data = {}
 let maxInfection = 0
 let path = d3.geoPath()
+
+const altSubstr = str => {
+    if (str.substr(0, 2) == '张家') return str.substr(0, 3)
+    if (str.substr(0, 3) == '公主岭') return "四平"
+    if (str.substr(0, 2) == '第七') return "克拉"
+    if (str.substr(0, 2) == '第八') return "石河"
+    return str.substr(0, 2)
+}
 
 fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
 
@@ -52,10 +53,14 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
             const render = (method) => {
 
                 d3.select("svg-frame").html("")
+                let { formula, dataDefault, style, properties } = method
 
-                let { formula, style, properties } = method
-                d3.select()
-                d3.select('.grad-bar').style('background', `linear-gradient(to right,${style.interpolation(0.2)},${style.interpolation(0.5)},${style.interpolation(0.9)})`)
+                const resetRegion = () => {
+                    d3.select(".rate").html(dataDefault.toFixed(method.properties.toFixed))
+                    d3.select(".city-name").html("China")
+                    d3.select('.grad-bar').style('background', `linear-gradient(to right,${style.interpolation(0.2)},${style.interpolation(0.5)},${style.interpolation(0.9)})`)
+                }
+                resetRegion()
 
                 d3.select('.title .light').text(properties.title)
                 d3.select('.desc').text(properties.desc)
@@ -82,12 +87,15 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                         d3.select('.city-name').text(d.properties.NAME)
                         if (cut in data) {
                             d3.select('.rate').text(formula(cut, d.properties).toFixed(method.properties.toFixed))
+                            d3.select('.grad-bar').style('background', style.paint(formula(cut, d.properties)))
                         }
-                        else d3.select('.rate').text(0)
+                        else {
+                            d3.select('.rate').text(0)
+                            d3.select('.grad-bar').style('background', '#222')
+                        }
                     })
                     .on("mouseout", d => {
-                        d3.select(".rate").html("")
-                        d3.select(".city-name").html("")
+                        resetRegion()
                     })
 
                 for (let city in data) {
@@ -101,6 +109,7 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
             let methods = {
                 ratio: {
                     formula: (cut, dProp) => data[cut].conNum / population.get(cut),
+                    dataDefault: +raw.data.gntotal / 138000,
                     style: {
                         paint: d3.scalePow()
                             .interpolate(() => d3.interpolateInferno)
@@ -117,6 +126,7 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                 },
                 density: {
                     formula: (cut, dProp) => data[cut].conNum / dProp.Shape_Area,
+                    dataDefault: +raw.data.gntotal / 960,
                     style: {
                         paint: d3.scalePow()
                             .interpolate(() => d3.interpolateViridis)
@@ -133,6 +143,7 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                 },
                 absolute: {
                     formula: (cut, dProp) => +data[cut].conNum,
+                    dataDefault: +raw.data.gntotal,
                     style: {
                         paint: d3.scalePow()
                             .interpolate(() => d3.interpolateCividis)
@@ -141,9 +152,9 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                         interpolation: d3.interpolateCividis
                     },
                     properties: {
-                        title: "Infection Absolute",
+                        title: "Total Infections",
                         abbv: "Absolute",
-                        desc: "Infections Count",
+                        desc: "Number of Infected People",
                         toFixed: 0
                     }
                 },
