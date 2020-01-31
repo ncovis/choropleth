@@ -142,7 +142,7 @@ svg-frame {
     text-transform: uppercase;
 }
 
-.sidebar * {
+a, .clickable {
     pointer-events: all;
 }
 

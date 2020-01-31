@@ -13,8 +13,6 @@ let path = d3.geoPath()
 const altSubstr = str => {
     if (str.substr(0, 2) == '张家') return str.substr(0, 3)
     if (str.substr(0, 3) == '公主岭') return "四平"
-    if (str.substr(0, 2) == '第七') return "克拉"
-    if (str.substr(0, 2) == '第八') return "石河"
     return str.substr(0, 2)
 }
 
@@ -149,8 +147,8 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                     properties: {
                         title: "Infection Density",
                         abbv: "密度 Density",
-                        desc: "Infections per 10,000 km² / 每 10,000 km² 感染数",
-                        toFixed: 4
+                        desc: "Infections per 10,000 km² / 每万 km² 感染数",
+                        toFixed: 2
                     }
                 },
                 absolute: {
