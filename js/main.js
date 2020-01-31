@@ -149,7 +149,7 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                     properties: {
                         title: "Infection Density",
                         abbv: "密度 Density",
-                        desc: "Infections per 10,000 km² / 每 km² 感染数",
+                        desc: "Infections per 10,000 km² / 每 10,000 km² 感染数",
                         toFixed: 4
                     }
                 },
