@@ -6,6 +6,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="theme-color" content="#181818">
     <title>Choropleth - nCoVis</title>
+    <style>
+        .to-invert {
+            filter: none;
+        }
+    </style>
     <link href="https://fonts.googleapis.com/css?family=Poppins:300,700&display=swap" rel="stylesheet">
     <link href="css/reset.css" rel="stylesheet">
     <link href="css/base.css" rel="stylesheet">
@@ -16,7 +21,7 @@
     <svg-frame>
     </svg-frame>
     <div class="container">
-        <div class="sidebar left">
+        <div class="sidebar left to-invert">
             <div class="cc-group">
                 <a class="clickable" href="https://creativecommons.org/licenses/by-sa/4.0/">
                     <img class="cc-by-sa" src="assets/cc-by-sa.svg">
@@ -52,11 +57,11 @@
                     中华人民共和国卫生与健康委员会<br />
                 </p>
                 <div class="legend">
-                    <div class="grad-bar"></div>
+                    <div class="grad-bar to-invert"></div>
                 </div>
             </div>
         </div>
-        <div class="sidebar right">
+        <div class="sidebar right to-invert">
             <div class="methods">
             </div>
             <div class="focus">

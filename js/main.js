@@ -1,4 +1,5 @@
 import fetchJsonp from 'fetch-jsonp'
+import chroma from 'chroma-js'
 
 let china = require('./../data/china-proj.topo.json')
 let topoData = topojson.feature(china, china.objects.provinces).features
@@ -16,9 +17,16 @@ const altSubstr = str => {
     return str.substr(0, 2)
 }
 
+const setOpacity = (hex, alpha) => {
+    var r = parseInt(hex.slice(1, 3), 16),
+        g = parseInt(hex.slice(3, 5), 16),
+        b = parseInt(hex.slice(5, 7), 16);
+    return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
+}
+
 document.body.addEventListener("mousemove", (e) => {
-    d3.select('body').style('background-position-x', +e.offsetX/10.0 + "px")
-    d3.select('body').style('background-position-y', +e.offsetY/10.0 + "px")
+    d3.select('html').style('background-position-x', +e.offsetX / 10.0 + "px")
+    d3.select('html').style('background-position-y', +e.offsetY / 10.0 + "px")
 });
 
 fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
@@ -32,12 +40,16 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
             if (prov.name == '西藏' && prov.city.length <= 1) { // Representing that Sina has not changed Tibet to city-scale data yet
                 data['拉萨'] = {
                     conNum: prov.value,
+                    deathNum: prov.deathNum,
+                    cureNum: prov.cureNum,
                     used: false
                 }
             }
             if (prov.name in special) {
                 data[prov.name] = {
                     conNum: prov.value,
+                    deathNum: prov.deathNum,
+                    cureNum: prov.cureNum,
                     used: false
                 }
             } else {
@@ -45,6 +57,8 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                     let name = city.name
                     data[altSubstr(name)] = {
                         conNum: city.conNum,
+                        deathNum: city.deathNum,
+                        cureNum: city.cureNum,
                         used: false
                     }
                     if (city.conNum > maxInfection) maxInfection = city.conNum
@@ -98,7 +112,8 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                     .on("click", d => {
                         let cut = altSubstr(d.properties.NAME)
                         if (cut in data) {
-                            d3.select('body').style('background-color', style.paint(formula(cut, d.properties)))
+                            let c = style.paint(formula(cut, d.properties))
+                            d3.select('body').style('background-color', chroma(c).alpha(0.75))
                         }
                         else {
                             d3.select('body').style('background-color', "")
@@ -146,7 +161,7 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                     },
                     properties: {
                         title: "Infection Density",
-                        abbv: "密度 Density",
+                        abbv: "感染密度 Density",
                         desc: "Infections per 10,000 km² / 每万 km² 感染数",
                         toFixed: 2
                     }
@@ -163,8 +178,42 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                     },
                     properties: {
                         title: "Total Infections",
-                        abbv: "人数 Absolute",
+                        abbv: "感染人数 Absolute",
                         desc: "Number of Infected People / 感染人数",
+                        toFixed: 0
+                    }
+                },
+                cures: {
+                    formula: (cut, dProp) => +data[cut].cureNum,
+                    dataDefault: +raw.data.curetotal,
+                    style: {
+                        paint: d3.scalePow()
+                            .interpolate(() => d3.interpolateGreens)
+                            .exponent(0.3)
+                            .domain([0, 100]),
+                        interpolation: d3.interpolateGreens
+                    },
+                    properties: {
+                        title: "Total Cured",
+                        abbv: "治愈 Cures",
+                        desc: "Number of Cured People / 治愈人数",
+                        toFixed: 0
+                    }
+                },
+                deaths: {
+                    formula: (cut, dProp) => +data[cut].deathNum,
+                    dataDefault: +raw.data.deathtotal,
+                    style: {
+                        paint: d3.scalePow()
+                            .interpolate(() => d3.interpolateGreys)
+                            .exponent(0.2)
+                            .domain([0, 1000]),
+                        interpolation: d3.interpolateGreys
+                    },
+                    properties: {
+                        title: "Total Deaths",
+                        abbv: "死亡 Deaths",
+                        desc: "Number of Deaths / 死亡人数",
                         toFixed: 0
                     }
                 },

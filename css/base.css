@@ -11,9 +11,13 @@ html, body {
     padding: 0;
 }
 
-body {
+html {
     background-color: #181818;
     background-image: url('../assets/bg.svg');
+    transition: background-position .2s, background-color .2s;
+}
+
+body {
     font-family: 'Poppins', '等线', sans-serif;
     color: #eee;
     display: flex;
