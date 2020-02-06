@@ -138,8 +138,8 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                     style: {
                         paint: d3.scalePow()
                             .interpolate(() => d3.interpolateInferno)
-                            .exponent(0.3)
-                            .domain([0, 1.5]),
+                            .exponent(0.25)
+                            .domain([0, 15]),
                         interpolation: d3.interpolateInferno
                     },
                     properties: {
@@ -206,8 +206,8 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                     style: {
                         paint: d3.scalePow()
                             .interpolate(() => d3.interpolateGreys)
-                            .exponent(0.2)
-                            .domain([0, 1000]),
+                            .exponent(0.15)
+                            .domain([0, 3000]),
                         interpolation: d3.interpolateGreys
                     },
                     properties: {
