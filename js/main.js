@@ -14,6 +14,7 @@ let path = d3.geoPath()
 const altSubstr = str => {
     if (str.substr(0, 2) == '张家') return str.substr(0, 3)
     if (str.substr(0, 3) == '公主岭') return "四平"
+    if (str.substr(0, 2) == '巴州') return '巴音'
     return str.substr(0, 2)
 }
 
@@ -184,37 +185,37 @@ fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
                     }
                 },
                 cures: {
-                    formula: (cut, dProp) => +data[cut].cureNum,
-                    dataDefault: +raw.data.curetotal,
+                    formula: (cut, dProp) => (+data[cut].cureNum) / (data[cut].conNum),
+                    dataDefault: +raw.data.curetotal / raw.data.gntotal,
                     style: {
                         paint: d3.scalePow()
                             .interpolate(() => d3.interpolateGreens)
-                            .exponent(0.3)
-                            .domain([0, 100]),
+                            .exponent(0.4)
+                            .domain([0, 2]),
                         interpolation: d3.interpolateGreens
                     },
                     properties: {
-                        title: "Total Cured",
-                        abbv: "治愈 Cures",
-                        desc: "Number of Cured People / 治愈人数",
-                        toFixed: 0
+                        title: "Cure Rate",
+                        abbv: "治愈率 Cure",
+                        desc: "Cures to Confirmed Infections / 治愈占确诊人数比例",
+                        toFixed: 3
                     }
                 },
                 deaths: {
-                    formula: (cut, dProp) => +data[cut].deathNum,
-                    dataDefault: +raw.data.deathtotal,
+                    formula: (cut, dProp) => (+data[cut].deathNum) / (data[cut].conNum),
+                    dataDefault: +raw.data.deathtotal / raw.data.gntotal,
                     style: {
                         paint: d3.scalePow()
                             .interpolate(() => d3.interpolateGreys)
-                            .exponent(0.15)
-                            .domain([0, 3000]),
+                            .exponent(0.3)
+                            .domain([0, 2]),
                         interpolation: d3.interpolateGreys
                     },
                     properties: {
-                        title: "Total Deaths",
-                        abbv: "死亡 Deaths",
-                        desc: "Number of Deaths / 死亡人数",
-                        toFixed: 0
+                        title: "Mortality Rate",
+                        abbv: "死亡率 Mortality",
+                        desc: "Deaths to Confirmed Infections / 死亡占确诊人数比例",
+                        toFixed: 3
                     }
                 },
             }
