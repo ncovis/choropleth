@@ -1,245 +1,316 @@
-import fetchJsonp from 'fetch-jsonp'
-import chroma from 'chroma-js'
+import fetchJsonp from "fetch-jsonp";
+import chroma from "chroma-js";
 
-let china = require('./../data/china-proj.topo.json')
-let topoData = topojson.feature(china, china.objects.provinces).features
-let censUrl = require('./../data/2010-census.csv')
+let world = require("./../data/countries-50m.json");
+let topoData = topojson.feature(world, world.objects.countries).features;
+let translationUrl = require("./../data/world-translate.csv");
+let populationUrl = require("./../data/population-wb.csv");
 
-console.log("Geographical Data", topoData)
+console.log("Geographical Data", topoData);
 
-let data = {}
-let maxInfection = 0
-let path = d3.geoPath()
+let data = {};
+let maxInfection = 0;
+let path = d3.geoPath(d3.geoNaturalEarth1());
 
-const altSubstr = str => {
-    if (str.substr(0, 2) == '张家') return str.substr(0, 3)
-    if (str.substr(0, 3) == '公主岭') return "四平"
-    if (str.substr(0, 2) == '巴州') return '巴音'
-    return str.substr(0, 2)
-}
-
-const setOpacity = (hex, alpha) => {
-    var r = parseInt(hex.slice(1, 3), 16),
-        g = parseInt(hex.slice(3, 5), 16),
-        b = parseInt(hex.slice(5, 7), 16);
-    return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
-}
-
-document.body.addEventListener("mousemove", (e) => {
-    d3.select('html').style('background-position-x', +e.offsetX / 10.0 + "px")
-    d3.select('html').style('background-position-y', +e.offsetY / 10.0 + "px")
+document.body.addEventListener("mousemove", e => {
+  d3.select("html").style("background-position-x", +e.offsetX / 10.0 + "px");
+  d3.select("html").style("background-position-y", +e.offsetY / 10.0 + "px");
 });
 
-fetchJsonp('https://interface.sina.cn/news/wap/fymap2020_data.d.json')
+fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
+  .then(function(response) {
+    return response.json();
+  })
+  .then(function(raw) {
+    console.log("Infection Data from Sina", raw);
+    raw.data.worldlist.forEach(country => {
+      data[country.name] = country;
+      data[country.name].computed = {};
+      if (country.name === "中国")
+        data[country.name].conNum = data[country.name].value;
+    });
+    fetch(translationUrl)
+      .then(res => res.text())
+      .then(translations => {
+        fetch(populationUrl)
+          .then(res => res.text())
+          .then(population => {
+            let translationMap = new Map(
+              d3.csvParse(translations, ({ en, zh }) => [en, zh])
+            );
 
-    .then(function (response) {
-        return response.json()
-    }).then(function (raw) {
-        console.log("Infection Data from Sina", raw)
-        raw.data.list.forEach(prov => {
-            let special = { "北京": 0, "天津": 0, "重庆": 0, "上海": 0, "台湾": 1, "香港": 1, "澳门": 1 }
-            if (prov.name == '西藏' && prov.city.length <= 1) { // Representing that Sina has not changed Tibet to city-scale data yet
-                data['拉萨'] = {
-                    conNum: prov.value,
-                    deathNum: prov.deathNum,
-                    cureNum: prov.cureNum,
-                    used: false
-                }
-            }
-            if (prov.name in special) {
-                data[prov.name] = {
-                    conNum: prov.value,
-                    deathNum: prov.deathNum,
-                    cureNum: prov.cureNum,
-                    used: false
-                }
-            } else {
-                prov.city.forEach(city => {
-                    let name = city.name
-                    data[altSubstr(name)] = {
-                        conNum: city.conNum,
-                        deathNum: city.deathNum,
-                        cureNum: city.cureNum,
-                        used: false
-                    }
-                    if (city.conNum > maxInfection) maxInfection = city.conNum
+            let populationMap = new Map(
+              d3.csvParse(population, ({ country, population }) => [
+                country,
+                population
+              ])
+            );
+
+            const render = method => {
+              d3.select("svg-frame").html("");
+              let { formula, dataDefault, style, properties } = method;
+
+              const resetRegion = () => {
+                d3.select(".rate").html(
+                  dataDefault.toFixed(method.properties.toFixed)
+                );
+                d3.select(".city-name").html("World / 全球");
+                d3.select(".grad-bar").style(
+                  "background",
+                  `linear-gradient(to right,${style.interpolation(
+                    0.2
+                  )},${style.interpolation(0.5)},${style.interpolation(0.9)})`
+                );
+              };
+              resetRegion();
+
+              d3.select(".title .light").text(properties.title);
+              d3.select(".desc").text(properties.desc);
+
+              d3.select("svg-frame")
+                .append("svg")
+                .attr("viewBox", [200, 0, 500, 300]) //150, -170, 730, 850
+                .append("g")
+                .selectAll("path")
+                .data(topoData)
+                .join("path")
+                .attr("class", "clickable")
+                .attr("fill", d => {
+                  let nameCN = translationMap.get(d.properties.name);
+                  if (nameCN in data) {
+                    data[nameCN].used = true;
+                    data[nameCN]["computed"][method.properties.abbv] = formula(
+                      d.properties
+                    );
+                    return style.paint(formula(d.properties));
+                  }
+                  return "#222";
                 })
-            }
-        })
-        fetch(censUrl).then(res => res.text()).then(cens => {
+                .attr("d", path)
+                .on("mouseover", d => {
+                  let nameCN = translationMap.get(d.properties.name);
+                  d3.select(".city-name").text(d.properties.name);
+                  if (nameCN in data) {
+                    d3.select(".rate").text(
+                      formula(d.properties).toFixed(method.properties.toFixed)
+                    );
+                  } else {
+                    d3.select(".rate").text(0);
+                  }
+                })
+                .on("click", d => {
+                  let nameCN = translationMap.get(d.properties.name);
+                  if (nameCN in data) {
+                    let c = style.paint(formula(d.properties));
+                    d3.select("body").style(
+                      "background-color",
+                      chroma(c).alpha(0.75)
+                    );
+                  } else {
+                    d3.select("body").style("background-color", "");
+                  }
+                })
+                .on("mouseout", d => {
+                  resetRegion();
+                });
 
-            const render = (method) => {
-
-                d3.select("svg-frame").html("")
-                let { formula, dataDefault, style, properties } = method
-
-                const resetRegion = () => {
-                    d3.select(".rate").html(dataDefault.toFixed(method.properties.toFixed))
-                    d3.select(".city-name").html("China / 全国")
-                    d3.select('.grad-bar').style('background', `linear-gradient(to right,${style.interpolation(0.2)},${style.interpolation(0.5)},${style.interpolation(0.9)})`)
-                }
-                resetRegion()
-
-                d3.select('.title .light').text(properties.title)
-                d3.select('.desc').text(properties.desc)
-
-                d3.select("svg-frame")
-                    .append("svg")
-                    .attr("viewBox", [0, 0, 875, 910])
-                    .append("g")
-                    .selectAll("path")
-                    .data(topoData)
-                    .join("path")
-                    .attr("class", "clickable")
-                    .attr("fill", d => {
-                        let cut = altSubstr(d.properties.NAME)
-                        if (cut in data) {
-                            data[cut].used = true
-                            return style.paint(formula(cut, d.properties))
-                        }
-                        return '#222'
-                    })
-                    .attr("d", path)
-                    .on("mouseover", d => {
-                        let cut = altSubstr(d.properties.NAME)
-                        d3.select('.city-name').text(d.properties.NAME)
-                        if (cut in data) {
-                            d3.select('.rate').text(formula(cut, d.properties).toFixed(method.properties.toFixed))
-                        }
-                        else {
-                            d3.select('.rate').text(0)
-                        }
-                    })
-                    .on("click", d => {
-                        let cut = altSubstr(d.properties.NAME)
-                        if (cut in data) {
-                            let c = style.paint(formula(cut, d.properties))
-                            d3.select('body').style('background-color', chroma(c).alpha(0.75))
-                        }
-                        else {
-                            d3.select('body').style('background-color', "")
-                        }
-                    })
-                    .on("mouseout", d => {
-                        resetRegion()
-                    })
-
-                for (let city in data) {
-                    if (!data[city].used) console.warn("Unused city", city)
-                }
-            }
-
-            let population = new Map(d3.csvParse(cens, ({ city, population }) => [altSubstr(city), population]))
-            console.log("Population Data from Census 2010", population)
+              for (let country in data) {
+                if (!data[country].used)
+                  console.warn("Unused country", country);
+              }
+            };
 
             let methods = {
-                ratio: {
-                    formula: (cut, dProp) => data[cut].conNum / population.get(cut),
-                    dataDefault: +raw.data.gntotal / 138000,
-                    style: {
-                        paint: d3.scalePow()
-                            .interpolate(() => d3.interpolateInferno)
-                            .exponent(0.25)
-                            .domain([0, 15]),
-                        interpolation: d3.interpolateInferno
-                    },
-                    properties: {
-                        title: "Infection Ratio",
-                        abbv: "感染比例 Ratio",
-                        desc: "Infections per 10,000 People / 每万人感染数",
-                        toFixed: 4
-                    }
+              confirmed: {
+                formula: dProp =>
+                  Number(data[translationMap.get(dProp.name)].conNum),
+                dataDefault: Number(raw.data.othertotal.certain),
+                style: {
+                  paint: d3
+                    .scalePow()
+                    .interpolate(() => d3.interpolateCividis)
+                    .exponent(0.4)
+                    .domain([-1000, 50000]),
+                  interpolation: d3.interpolateCividis
                 },
-                density: {
-                    formula: (cut, dProp) => data[cut].conNum / dProp.Shape_Area,
-                    dataDefault: +raw.data.gntotal / 960,
-                    style: {
-                        paint: d3.scalePow()
-                            .interpolate(() => d3.interpolateViridis)
-                            .exponent(0.3)
-                            .domain([0, 1500]),
-                        interpolation: d3.interpolateViridis
-                    },
-                    properties: {
-                        title: "Infection Density",
-                        abbv: "感染密度 Density",
-                        desc: "Infections per 10,000 km² / 每万 km² 感染数",
-                        toFixed: 2
-                    }
+                properties: {
+                  title: "Confirmed",
+                  abbv: "confirmed",
+                  desc: "Number of total infected people",
+                  toFixed: 0
+                }
+              },
+              rConfirmed: {
+                formula: dProp => {
+                  let res =
+                    (Number(data[translationMap.get(dProp.name)].conNum) *
+                      10000) /
+                    populationMap.get(dProp.name);
+                  if (isNaN(res))
+                    console.warn("Missing population data", dProp.name);
+                  return res;
                 },
-                absolute: {
-                    formula: (cut, dProp) => +data[cut].conNum,
-                    dataDefault: +raw.data.gntotal,
-                    style: {
-                        paint: d3.scalePow()
-                            .interpolate(() => d3.interpolateCividis)
-                            .exponent(0.3)
-                            .domain([0, 1500]),
-                        interpolation: d3.interpolateCividis
-                    },
-                    properties: {
-                        title: "Total Infections",
-                        abbv: "感染人数 Absolute",
-                        desc: "Number of Infected People / 感染人数",
-                        toFixed: 0
-                    }
+                dataDefault: Number(raw.data.othertotal.certain) / 770000,
+                style: {
+                  paint: d3
+                    .scalePow()
+                    .interpolate(() => d3.interpolateInferno)
+                    .exponent(0.4)
+                    .domain([-1, 5]),
+                  interpolation: d3.interpolateInferno
                 },
-                cures: {
-                    formula: (cut, dProp) => (+data[cut].cureNum) / (data[cut].conNum),
-                    dataDefault: +raw.data.curetotal / raw.data.gntotal,
-                    style: {
-                        paint: d3.scalePow()
-                            .interpolate(() => d3.interpolateGreens)
-                            .exponent(0.4)
-                            .domain([0, 2]),
-                        interpolation: d3.interpolateGreens
-                    },
-                    properties: {
-                        title: "Cure Rate",
-                        abbv: "治愈率 Cure",
-                        desc: "Cures to Confirmed Infections / 治愈占确诊人数比例",
-                        toFixed: 3
-                    }
+                properties: {
+                  title: "Confirmed Ratio",
+                  abbv: "r-confirmed",
+                  desc: "Confirmed infections every 10,000 people",
+                  toFixed: 4
+                }
+              },
+              existing: {
+                formula: dProp =>
+                  Number(data[translationMap.get(dProp.name)].conNum) -
+                  Number(data[translationMap.get(dProp.name)].cureNum) -
+                  Number(data[translationMap.get(dProp.name)].deathNum),
+                dataDefault:
+                  Number(raw.data.othertotal.certain) -
+                  Number(raw.data.othertotal.die) -
+                  Number(raw.data.othertotal.recure),
+                style: {
+                  paint: d3
+                    .scalePow()
+                    .interpolate(() => d3.interpolateCividis)
+                    .exponent(0.4)
+                    .domain([-1000, 50000]),
+                  interpolation: d3.interpolateCividis
                 },
-                deaths: {
-                    formula: (cut, dProp) => (+data[cut].deathNum) / (data[cut].conNum),
-                    dataDefault: +raw.data.deathtotal / raw.data.gntotal,
-                    style: {
-                        paint: d3.scalePow()
-                            .interpolate(() => d3.interpolateGreys)
-                            .exponent(0.3)
-                            .domain([0, 2]),
-                        interpolation: d3.interpolateGreys
-                    },
-                    properties: {
-                        title: "Mortality Rate",
-                        abbv: "死亡率 Mortality",
-                        desc: "Deaths to Confirmed Infections / 死亡占确诊人数比例",
-                        toFixed: 3
-                    }
+                properties: {
+                  title: "Existing Confirmed",
+                  abbv: "existing",
+                  desc: "Number of existing infected people",
+                  toFixed: 0
+                }
+              },
+              rExisting: {
+                formula: dProp => {
+                  let existing =
+                    Number(data[translationMap.get(dProp.name)].conNum) -
+                    Number(data[translationMap.get(dProp.name)].cureNum) -
+                    Number(data[translationMap.get(dProp.name)].deathNum);
+                  let res = (existing * 10000) / populationMap.get(dProp.name);
+                  return res;
                 },
-            }
+                dataDefault:
+                  (Number(raw.data.othertotal.certain) -
+                    Number(raw.data.othertotal.die) -
+                    Number(raw.data.othertotal.recure)) /
+                  770000,
+                style: {
+                  paint: d3
+                    .scalePow()
+                    .interpolate(() => d3.interpolateViridis)
+                    .exponent(0.4)
+                    .domain([-0.01, 7]),
+                  interpolation: d3.interpolateViridis
+                },
+                properties: {
+                  title: "Existing Ratio",
+                  abbv: "r-existing",
+                  desc: "Existing confirmed infections every 10,000 people",
+                  toFixed: 4
+                }
+              },
+              rDeath: {
+                formula: dProp => {
+                  let existing = Number(
+                    data[translationMap.get(dProp.name)].deathNum
+                  );
+                  let res = (existing * 10000) / populationMap.get(dProp.name);
+                  return res;
+                },
+                dataDefault: Number(raw.data.othertotal.die) / 770000,
+                style: {
+                  paint: d3
+                    .scalePow()
+                    .interpolate(() => d3.interpolateReds)
+                    .exponent(0.6)
+                    .domain([-0.01, 0.3]),
+                  interpolation: d3.interpolateReds
+                },
+                properties: {
+                  title: "Motality Rate",
+                  abbv: "r-death",
+                  desc: "Deaths every 10,000 people",
+                  toFixed: 4
+                }
+              },
+              deathToConfirmed: {
+                formula: dProp => {
+                  let existing = Number(
+                    data[translationMap.get(dProp.name)].deathNum /
+                      Number(data[translationMap.get(dProp.name)].conNum)
+                  );
+                  let res = existing;
+                  return res;
+                },
+                dataDefault: Number(raw.data.othertotal.die) / 770000,
+                style: {
+                  paint: d3
+                    .scalePow()
+                    .interpolate(() => d3.interpolateReds)
+                    .exponent(0.4)
+                    .domain([-0.01, 1]),
+                  interpolation: d3.interpolateReds
+                },
+                properties: {
+                  title: "Death to Confirmed",
+                  abbv: "death-to-confirmed",
+                  desc: "Deaths / Confirmed Cases",
+                  toFixed: 4
+                }
+              }
+            };
 
             for (let method in methods) {
-                d3.select('.methods')
-                    .append('input')
-                    .attr('type', 'radio')
-                    .attr('name', 'method-ratio')
-                    .attr('id', method)
-                    .on('click', () => render(methods[method]))
+              d3.select(".methods")
+                .append("input")
+                .attr("type", "radio")
+                .attr("name", "method-ratio")
+                .attr("id", method)
+                .on("click", () => render(methods[method]));
 
-                d3.select('.methods')
-                    .append('label')
-                    .attr('for', method)
-                    .attr('class', 'clickable')
-                    .text(methods[method].properties.abbv)
+              d3.select(".methods")
+                .append("label")
+                .attr("for", method)
+                .attr("class", "clickable")
+                .text(methods[method].properties.abbv);
             }
 
             // Fire the first render
-            document.querySelector('label[for="ratio"]').click()
+            document.querySelector('label[for="rExisting"]').click();
 
-        })
-    }).catch(function (ex) {
-        console.log('parsing failed', ex)
-    })
+            function sortObject(obj) {
+              var arr = [];
+              for (var prop in obj) {
+                if (
+                  obj.hasOwnProperty(prop) &&
+                  obj[prop].computed["r-existing"] !== undefined
+                ) {
+                  arr.push({
+                    key: prop,
+                    value: obj[prop].computed["r-existing"]
+                  });
+                }
+              }
+              arr.sort(function(a, b) {
+                return a.value - b.value;
+              });
+              return arr;
+            }
 
+            console.log(sortObject(data));
+          });
+      });
+  })
+  .catch(function(ex) {
+    console.log("parsing failed", ex);
+  });
