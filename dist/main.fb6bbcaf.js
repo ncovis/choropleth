@@ -5248,7 +5248,8 @@ document.body.addEventListener("mousemove", function (e) {
         resetRegion();
         d3.select(".title .light").text(properties.title);
         d3.select(".desc").text(properties.desc);
-        d3.select("svg-frame").append("svg").attr("viewBox", [200, 0, 500, 300]) //150, -170, 730, 850
+        d3.select("svg-frame").append("svg").attr("viewBox", [150, -170, 730, 850]) // Global
+        // .attr("viewBox", [200, 0, 500, 300]) // Atlantic
         .append("g").selectAll("path").data(topoData).join("path").attr("class", "clickable").attr("fill", function (d) {
           var nameCN = translationMap.get(d.properties.name);
 
@@ -5295,7 +5296,7 @@ document.body.addEventListener("mousemove", function (e) {
           style: {
             paint: d3.scalePow().interpolate(function () {
               return d3.interpolateCividis;
-            }).exponent(0.4).domain([-1000, 50000]),
+            }).exponent(0.4).domain([-1000, 100000]),
             interpolation: d3.interpolateCividis
           },
           properties: {
@@ -5315,7 +5316,7 @@ document.body.addEventListener("mousemove", function (e) {
           style: {
             paint: d3.scalePow().interpolate(function () {
               return d3.interpolateInferno;
-            }).exponent(0.4).domain([-1, 5]),
+            }).exponent(0.4).domain([-1, 15]),
             interpolation: d3.interpolateInferno
           },
           properties: {
@@ -5333,7 +5334,7 @@ document.body.addEventListener("mousemove", function (e) {
           style: {
             paint: d3.scalePow().interpolate(function () {
               return d3.interpolateCividis;
-            }).exponent(0.4).domain([-1000, 50000]),
+            }).exponent(0.4).domain([-1000, 80000]),
             interpolation: d3.interpolateCividis
           },
           properties: {
@@ -5353,7 +5354,7 @@ document.body.addEventListener("mousemove", function (e) {
           style: {
             paint: d3.scalePow().interpolate(function () {
               return d3.interpolateViridis;
-            }).exponent(0.4).domain([-0.01, 7]),
+            }).exponent(0.4).domain([-0.01, 15]),
             interpolation: d3.interpolateViridis
           },
           properties: {
@@ -5373,7 +5374,7 @@ document.body.addEventListener("mousemove", function (e) {
           style: {
             paint: d3.scalePow().interpolate(function () {
               return d3.interpolateReds;
-            }).exponent(0.6).domain([-0.01, 0.3]),
+            }).exponent(0.3).domain([-0.01, 2]),
             interpolation: d3.interpolateReds
           },
           properties: {
@@ -5471,7 +5472,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58063" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60827" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

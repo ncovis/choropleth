@@ -69,7 +69,8 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
 
               d3.select("svg-frame")
                 .append("svg")
-                .attr("viewBox", [200, 0, 500, 300]) //150, -170, 730, 850
+                .attr("viewBox", [150, -170, 730, 850]) // Global
+                // .attr("viewBox", [200, 0, 500, 300]) // Atlantic
                 .append("g")
                 .selectAll("path")
                 .data(topoData)
@@ -130,7 +131,7 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
                     .scalePow()
                     .interpolate(() => d3.interpolateCividis)
                     .exponent(0.4)
-                    .domain([-1000, 50000]),
+                    .domain([-1000, 100000]),
                   interpolation: d3.interpolateCividis
                 },
                 properties: {
@@ -156,7 +157,7 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
                     .scalePow()
                     .interpolate(() => d3.interpolateInferno)
                     .exponent(0.4)
-                    .domain([-1, 5]),
+                    .domain([-1, 15]),
                   interpolation: d3.interpolateInferno
                 },
                 properties: {
@@ -180,7 +181,7 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
                     .scalePow()
                     .interpolate(() => d3.interpolateCividis)
                     .exponent(0.4)
-                    .domain([-1000, 50000]),
+                    .domain([-1000, 80000]),
                   interpolation: d3.interpolateCividis
                 },
                 properties: {
@@ -209,7 +210,7 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
                     .scalePow()
                     .interpolate(() => d3.interpolateViridis)
                     .exponent(0.4)
-                    .domain([-0.01, 7]),
+                    .domain([-0.01, 15]),
                   interpolation: d3.interpolateViridis
                 },
                 properties: {
@@ -232,8 +233,8 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
                   paint: d3
                     .scalePow()
                     .interpolate(() => d3.interpolateReds)
-                    .exponent(0.6)
-                    .domain([-0.01, 0.3]),
+                    .exponent(0.3)
+                    .domain([-0.01, 2]),
                   interpolation: d3.interpolateReds
                 },
                 properties: {

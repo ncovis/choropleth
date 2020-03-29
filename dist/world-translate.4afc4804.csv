@@ -17,6 +17,7 @@
 墨西哥,Mexico
 奥地利,Austria
 尼日利亚,Nigeria
+尼日尔,Niger
 尼泊尔,Nepal
 巴基斯坦,Pakistan
 巴林,Bahrain
@@ -38,7 +39,7 @@
 瑞士,Switzerland
 白俄罗斯,Belarus
 科威特,Kuwait
-科特迪瓦,Ivory Coast
+科特迪瓦,Côte d'Ivoire
 立陶宛,Lithuania
 罗马尼亚,Romania
 芬兰,Finland
@@ -127,6 +128,8 @@
 安提瓜和巴布达,Antigua and Barbuda
 苏里南,Suriname
 毛里塔尼亚,Mauritania
+毛里求斯,Mauritius
+海地,Haiti
 斯威士兰,eSwatini
 卢旺达,Rwanda
 纳米比亚,Namibia
@@ -147,3 +150,29 @@
 冈比亚,Gambia
 巴巴多斯,Barbados
 吉尔吉斯斯坦,Kyrgyzstan
+萨尔瓦多,El Salvador
+斐济,Fiji
+乍得,Chad
+津巴布韦,Zimbabwe
+缅甸,Myanmar
+乌干达,Uganda
+伯利兹,Belize
+安哥拉,Angola
+莫桑比克,Mozambique
+马里,Mali
+赞比亚,Zambia
+布隆迪,Burundi
+博茨瓦纳,Botswana
+马拉维,Malawi
+老挝,Laos
+巴布亚新几内亚,Papua New Guinea
+尼加拉瓜,Nicaragua
+多米尼克,Dominican Rep.
+厄立特里亚,Eritrea
+索马里兰,Somaliland
+几内亚比绍,Guinea-Bissau
+马达加斯加,Madagascar
+叙利亚,Syria
+东帝汶,East Timor
+佛得角,Cape Verde
+法罗群岛,Faroe Islands
