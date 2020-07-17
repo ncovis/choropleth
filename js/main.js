@@ -342,7 +342,7 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.jsodn")
     swal({
       title: "💤 Hmmm...",
       text: `The infection data failed to load successfully. This may be because the resource path or format that this webpage depends on has changed. We'll show the newest cached data instead.`,
-      button: "Well, what else can you do?"
+      button: "Not again... 🤦"
     })
     fetch(cachedRawUrl)
     .then(res => res.json())
