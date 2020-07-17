@@ -5202,6 +5202,7 @@ console.log("Geographical Data", topoData);
 var data = {};
 var maxInfection = 0;
 var path = d3.geoPath(d3.geoNaturalEarth1());
+var scale = 1;
 document.body.addEventListener("mousemove", function (e) {
   d3.select("html").style("background-position-x", +e.offsetX / 10.0 + "px");
   d3.select("html").style("background-position-y", +e.offsetY / 10.0 + "px");
@@ -5239,6 +5240,13 @@ document.body.addEventListener("mousemove", function (e) {
             style = method.style,
             properties = method.properties;
 
+        var formulaR = function formulaR(d) {
+          if (isNaN(formula(d))) {
+            console.warn("Invalid result for " + d.name);
+            return 0;
+          } else return formula(d);
+        };
+
         var resetRegion = function resetRegion() {
           d3.select(".rate").html(dataDefault.toFixed(method.properties.toFixed));
           d3.select(".city-name").html("World / 全球");
@@ -5248,15 +5256,17 @@ document.body.addEventListener("mousemove", function (e) {
         resetRegion();
         d3.select(".title .light").text(properties.title);
         d3.select(".desc").text(properties.desc);
-        d3.select("svg-frame").append("svg").attr("viewBox", [150, -170, 730, 850]) // Global
+        var svg = d3.select("svg-frame").append("svg").attr("viewBox", [170, -70, 630, 550]); // Global
         // .attr("viewBox", [200, 0, 500, 300]) // Atlantic
-        .append("g").selectAll("path").data(topoData).join("path").attr("class", "clickable").attr("fill", function (d) {
+
+        var g = svg.append("g");
+        g.attr("id", "geo-paths").selectAll("path").data(topoData).join("path").attr("class", "clickable").attr("fill", function (d) {
           var nameCN = translationMap.get(d.properties.name);
 
           if (nameCN in data) {
             data[nameCN].used = true;
-            data[nameCN]["computed"][method.properties.abbv] = formula(d.properties);
-            return style.paint(formula(d.properties));
+            data[nameCN]["computed"][method.properties.abbv] = formulaR(d.properties);
+            return style.paint(formulaR(d.properties));
           }
 
           return "#222";
@@ -5265,7 +5275,7 @@ document.body.addEventListener("mousemove", function (e) {
           d3.select(".city-name").text(d.properties.name);
 
           if (nameCN in data) {
-            d3.select(".rate").text(formula(d.properties).toFixed(method.properties.toFixed));
+            d3.select(".rate").text(formulaR(d.properties).toFixed(method.properties.toFixed));
           } else {
             d3.select(".rate").text(0);
           }
@@ -5273,7 +5283,7 @@ document.body.addEventListener("mousemove", function (e) {
           var nameCN = translationMap.get(d.properties.name);
 
           if (nameCN in data) {
-            var c = style.paint(formula(d.properties));
+            var c = style.paint(formulaR(d.properties));
             d3.select("body").style("background-color", (0, _chromaJs.default)(c).alpha(0.75));
           } else {
             d3.select("body").style("background-color", "");
@@ -5281,6 +5291,10 @@ document.body.addEventListener("mousemove", function (e) {
         }).on("mouseout", function (d) {
           resetRegion();
         });
+        var zoom = d3.zoom().scaleExtent([0.5, 8]).on('zoom', function () {
+          g.attr('transform', d3.event.transform);
+        });
+        svg.call(zoom);
 
         for (var country in data) {
           if (!data[country].used) console.warn("Unused country", country);
@@ -5296,7 +5310,7 @@ document.body.addEventListener("mousemove", function (e) {
           style: {
             paint: d3.scalePow().interpolate(function () {
               return d3.interpolateCividis;
-            }).exponent(0.4).domain([-1000, 100000]),
+            }).exponent(0.3).domain([-1000, 3000000]),
             interpolation: d3.interpolateCividis
           },
           properties: {
@@ -5316,7 +5330,7 @@ document.body.addEventListener("mousemove", function (e) {
           style: {
             paint: d3.scalePow().interpolate(function () {
               return d3.interpolateInferno;
-            }).exponent(0.4).domain([-1, 15]),
+            }).exponent(0.5).domain([-5, 150]),
             interpolation: d3.interpolateInferno
           },
           properties: {
@@ -5334,7 +5348,7 @@ document.body.addEventListener("mousemove", function (e) {
           style: {
             paint: d3.scalePow().interpolate(function () {
               return d3.interpolateCividis;
-            }).exponent(0.4).domain([-1000, 80000]),
+            }).exponent(0.4).domain([-1000, 800000]),
             interpolation: d3.interpolateCividis
           },
           properties: {
@@ -5354,7 +5368,7 @@ document.body.addEventListener("mousemove", function (e) {
           style: {
             paint: d3.scalePow().interpolate(function () {
               return d3.interpolateViridis;
-            }).exponent(0.4).domain([-0.01, 15]),
+            }).exponent(0.3).domain([-0.3, 55]),
             interpolation: d3.interpolateViridis
           },
           properties: {
@@ -5374,7 +5388,7 @@ document.body.addEventListener("mousemove", function (e) {
           style: {
             paint: d3.scalePow().interpolate(function () {
               return d3.interpolateReds;
-            }).exponent(0.3).domain([-0.01, 2]),
+            }).exponent(0.3).domain([-0.01, 10]),
             interpolation: d3.interpolateReds
           },
           properties: {
@@ -5394,7 +5408,7 @@ document.body.addEventListener("mousemove", function (e) {
           style: {
             paint: d3.scalePow().interpolate(function () {
               return d3.interpolateReds;
-            }).exponent(0.4).domain([-0.01, 1]),
+            }).exponent(0.4).domain([-0.01, 0.5]),
             interpolation: d3.interpolateReds
           },
           properties: {
@@ -5444,7 +5458,7 @@ document.body.addEventListener("mousemove", function (e) {
 }).catch(function (ex) {
   console.log("parsing failed", ex);
 });
-},{"fetch-jsonp":"node_modules/fetch-jsonp/build/fetch-jsonp.js","chroma-js":"node_modules/chroma-js/chroma.js","./../data/countries-50m.json":"data/countries-50m.json","./../data/world-translate.csv":"data/world-translate.csv","./../data/population-wb.csv":"data/population-wb.csv"}],"../../../Users/cyphe/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"fetch-jsonp":"node_modules/fetch-jsonp/build/fetch-jsonp.js","chroma-js":"node_modules/chroma-js/chroma.js","./../data/countries-50m.json":"data/countries-50m.json","./../data/world-translate.csv":"data/world-translate.csv","./../data/population-wb.csv":"data/population-wb.csv"}],"C:/Users/Tzingtao/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -5472,7 +5486,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60827" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "4690" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -5648,5 +5662,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["../../../Users/cyphe/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","js/main.js"], null)
+},{}]},{},["C:/Users/Tzingtao/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","js/main.js"], null)
 //# sourceMappingURL=/main.fb6bbcaf.js.map

@@ -181,6 +181,10 @@ a,
   pointer-events: none;
 }
 
+#geo-paths {
+  transition: transform 1s;
+}
+
 input[type="radio"] {
   display: none;
 }

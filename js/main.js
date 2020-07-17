@@ -11,6 +11,7 @@ console.log("Geographical Data", topoData);
 let data = {};
 let maxInfection = 0;
 let path = d3.geoPath(d3.geoNaturalEarth1());
+let scale = 1
 
 document.body.addEventListener("mousemove", e => {
   d3.select("html").style("background-position-x", +e.offsetX / 10.0 + "px");
@@ -48,7 +49,14 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
 
             const render = method => {
               d3.select("svg-frame").html("");
-              let { formula, dataDefault, style, properties } = method;
+              let { formula, dataDefault, style, properties } = method
+              let formulaR = d => {
+                if (isNaN(formula(d))) {
+                  console.warn("Invalid result for " + d.name)
+                  return 0
+                }
+                else return formula(d)
+              }
 
               const resetRegion = () => {
                 d3.select(".rate").html(
@@ -67,11 +75,14 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
               d3.select(".title .light").text(properties.title);
               d3.select(".desc").text(properties.desc);
 
-              d3.select("svg-frame")
+              const svg = d3.select("svg-frame")
                 .append("svg")
-                .attr("viewBox", [150, -170, 730, 850]) // Global
+                .attr("viewBox", [170, -70, 630, 550]) // Global
                 // .attr("viewBox", [200, 0, 500, 300]) // Atlantic
-                .append("g")
+
+              const g = svg.append("g")
+
+              g.attr("id", "geo-paths")
                 .selectAll("path")
                 .data(topoData)
                 .join("path")
@@ -80,10 +91,10 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
                   let nameCN = translationMap.get(d.properties.name);
                   if (nameCN in data) {
                     data[nameCN].used = true;
-                    data[nameCN]["computed"][method.properties.abbv] = formula(
+                    data[nameCN]["computed"][method.properties.abbv] = formulaR(
                       d.properties
                     );
-                    return style.paint(formula(d.properties));
+                    return style.paint(formulaR(d.properties));
                   }
                   return "#222";
                 })
@@ -93,7 +104,7 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
                   d3.select(".city-name").text(d.properties.name);
                   if (nameCN in data) {
                     d3.select(".rate").text(
-                      formula(d.properties).toFixed(method.properties.toFixed)
+                      formulaR(d.properties).toFixed(method.properties.toFixed)
                     );
                   } else {
                     d3.select(".rate").text(0);
@@ -102,7 +113,7 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
                 .on("click", d => {
                   let nameCN = translationMap.get(d.properties.name);
                   if (nameCN in data) {
-                    let c = style.paint(formula(d.properties));
+                    let c = style.paint(formulaR(d.properties));
                     d3.select("body").style(
                       "background-color",
                       chroma(c).alpha(0.75)
@@ -113,7 +124,15 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
                 })
                 .on("mouseout", d => {
                   resetRegion();
-                });
+                })
+
+              
+
+              const zoom = d3.zoom().scaleExtent([0.5, 8]).on('zoom', () => {
+                g.attr('transform', d3.event.transform);
+              });
+
+              svg.call(zoom)
 
               for (let country in data) {
                 if (!data[country].used)
@@ -130,8 +149,8 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
                   paint: d3
                     .scalePow()
                     .interpolate(() => d3.interpolateCividis)
-                    .exponent(0.4)
-                    .domain([-1000, 100000]),
+                    .exponent(0.3)
+                    .domain([-1000, 3000000]),
                   interpolation: d3.interpolateCividis
                 },
                 properties: {
@@ -156,8 +175,8 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
                   paint: d3
                     .scalePow()
                     .interpolate(() => d3.interpolateInferno)
-                    .exponent(0.4)
-                    .domain([-1, 15]),
+                    .exponent(0.5)
+                    .domain([-5, 150]),
                   interpolation: d3.interpolateInferno
                 },
                 properties: {
@@ -181,7 +200,7 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
                     .scalePow()
                     .interpolate(() => d3.interpolateCividis)
                     .exponent(0.4)
-                    .domain([-1000, 80000]),
+                    .domain([-1000, 800000]),
                   interpolation: d3.interpolateCividis
                 },
                 properties: {
@@ -209,8 +228,8 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
                   paint: d3
                     .scalePow()
                     .interpolate(() => d3.interpolateViridis)
-                    .exponent(0.4)
-                    .domain([-0.01, 15]),
+                    .exponent(0.3)
+                    .domain([-0.3, 55]),
                   interpolation: d3.interpolateViridis
                 },
                 properties: {
@@ -234,7 +253,7 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
                     .scalePow()
                     .interpolate(() => d3.interpolateReds)
                     .exponent(0.3)
-                    .domain([-0.01, 2]),
+                    .domain([-0.01, 10]),
                   interpolation: d3.interpolateReds
                 },
                 properties: {
@@ -259,7 +278,7 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
                     .scalePow()
                     .interpolate(() => d3.interpolateReds)
                     .exponent(0.4)
-                    .domain([-0.01, 1]),
+                    .domain([-0.01, 0.5]),
                   interpolation: d3.interpolateReds
                 },
                 properties: {
