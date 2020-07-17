@@ -19,7 +19,7 @@ html {
 }
 
 body {
-  font-family: "Poppins", "等线", sans-serif;
+  font-family: "Sora", "等线", sans-serif;
   color: #eee;
   display: flex;
   flex-direction: row;
@@ -99,8 +99,9 @@ svg-frame {
 
 .title-s {
   color: rgba(255, 255, 255, 0.4);
-  font-size: 14px;
+  font-size: 12px;
   text-transform: uppercase;
+  line-height: 1.5;
 }
 
 .cc-by-sa {
@@ -148,11 +149,16 @@ svg-frame {
   font-size: 30px;
   line-height: 1.35;
   text-transform: uppercase;
+  text-shadow: 0px 0px 30px black;
 }
 
 a,
 .clickable {
   pointer-events: all;
+}
+
+strong, h1, h2, h3, h4, h5, h6 {
+  font-weight: 800;
 }
 
 .scs-islands {
@@ -211,7 +217,7 @@ input[type="radio"] + label:before {
     font-size: 35px;
   }
   .title-s {
-    font-size: 11px;
+    font-size: 10px;
   }
   .rate {
     font-size: 30px;
