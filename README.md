@@ -8,11 +8,7 @@ Compared with other existing visualization projects for nCoV-2019, nCoVis Chorop
 
 Note that this project is still in the experimental stage. Additional modules are under development.
 
-![Preview](assets/preview-1.jpg "Preview")
-
-![Preview](assets/preview-2.jpg "Preview")
-
-![Preview](assets/preview-3.jpg "Preview")
+![Preview](assets/preview-all.jpg "Preview")
 
 ### Start Building
 
