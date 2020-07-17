@@ -99,10 +99,13 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
           d3.select(".title .light").text(properties.title);
           d3.select(".desc").text(properties.desc);
 
-          d3.select("svg-frame")
+          const svg = d3.select("svg-frame")
             .append("svg")
             .attr("viewBox", [0, 0, 875, 910])
-            .append("g")
+
+          const g = svg.append("g")
+            
+          g.attr("id", "geo-paths")
             .selectAll("path")
             .data(topoData)
             .join("path")
@@ -142,6 +145,11 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
             .on("mouseout", d => {
               resetRegion();
             });
+
+            const zoom = d3.zoom().scaleExtent([0.5, 8]).on('zoom', () => {
+              g.attr('transform', d3.event.transform);
+            });
+            svg.call(zoom)
 
           for (let city in data) {
             if (!data[city].used) console.warn("Unused city", city);
