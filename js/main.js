@@ -332,7 +332,7 @@ document.body.addEventListener("mousemove", e => {
   d3.select("html").style("background-position-y", +e.offsetY / 10.0 + "px")
 })
 
-fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.jsodn")
+fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
   .then(function(response) {
     return response.json();
   })
