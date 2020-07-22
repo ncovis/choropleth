@@ -5465,7 +5465,7 @@ document.body.addEventListener("mousemove", function (e) {
   d3.select("html").style("background-position-x", +e.offsetX / 10.0 + "px");
   d3.select("html").style("background-position-y", +e.offsetY / 10.0 + "px");
 });
-(0, _fetchJsonp.default)("https://interface.sina.cn/news/wap/fymap2020_data.d.jsodn").then(function (response) {
+(0, _fetchJsonp.default)("https://interface.sina.cn/news/wap/fymap2020_data.d.json").then(function (response) {
   return response.json();
 }).then(processRaw).catch(function (ex) {
   console.log("parsing failed", ex);
