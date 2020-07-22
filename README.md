@@ -2,7 +2,7 @@
 
 ### About
 
-Visualization of the Novel Coronavirus outbreak in Wuhan, China. 
+Visualization of the Novel Coronavirus outbreak in Wuhan, China. [Demo here](https://ncovis.github.io/choropleth/).
 
 Compared with other existing visualization projects for nCoV-2019, nCoVis Choropleth collects and visualizes data of prefecture-level cities (instead of provinces), as well as other indicators such as infection density (infections per km²) and infection ratio (%).
 
