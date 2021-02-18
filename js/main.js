@@ -145,7 +145,7 @@ let processRaw = raw => {
                   .scalePow()
                   .interpolate(() => d3.interpolateCividis)
                   .exponent(0.3)
-                  .domain([-1000, 3000000]),
+                  .domain([-1000, 30000000]),
                 interpolation: d3.interpolateCividis
               },
               properties: {
@@ -170,8 +170,8 @@ let processRaw = raw => {
                 paint: d3
                   .scalePow()
                   .interpolate(() => d3.interpolateInferno)
-                  .exponent(0.5)
-                  .domain([-5, 150]),
+                  .exponent(0.4)
+                  .domain([-10, 1000]),
                 interpolation: d3.interpolateInferno
               },
               properties: {
@@ -194,8 +194,8 @@ let processRaw = raw => {
                 paint: d3
                   .scalePow()
                   .interpolate(() => d3.interpolateCividis)
-                  .exponent(0.4)
-                  .domain([-1000, 800000]),
+                  .exponent(0.3)
+                  .domain([-1000, 8000000]),
                 interpolation: d3.interpolateCividis
               },
               properties: {
@@ -224,7 +224,7 @@ let processRaw = raw => {
                   .scalePow()
                   .interpolate(() => d3.interpolateViridis)
                   .exponent(0.3)
-                  .domain([-0.3, 55]),
+                  .domain([-1, 600]),
                 interpolation: d3.interpolateViridis
               },
               properties: {
@@ -248,7 +248,7 @@ let processRaw = raw => {
                   .scalePow()
                   .interpolate(() => d3.interpolateReds)
                   .exponent(0.3)
-                  .domain([-0.01, 10]),
+                  .domain([-0.01, 30]),
                 interpolation: d3.interpolateReds
               },
               properties: {
