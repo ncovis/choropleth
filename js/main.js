@@ -4,6 +4,7 @@ import chroma from "chroma-js";
 let china = require("./../data/china-proj.topo.json");
 let topoData = topojson.feature(china, china.objects.provinces).features;
 let censUrl = require("./../data/2010-census.csv");
+const DIM_COLOR = "#222"
 
 console.log("Geographical Data", topoData);
 
@@ -15,6 +16,7 @@ const altSubstr = str => {
   if (str.substr(0, 2) == "张家") return str.substr(0, 3);
   if (str.substr(0, 3) == "公主岭") return "四平";
   if (str.substr(0, 2) == "巴州") return "巴音";
+  if (str.substr(0, 2) == "克州") return "克孜";
   return str.substr(0, 2);
 };
 
@@ -25,16 +27,21 @@ const setOpacity = (hex, alpha) => {
   return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
 };
 
+const deNaN = orig => {
+  if (orig === 'NaN' || isNaN(orig)) return "N/A"
+  return orig
+}
+
 document.body.addEventListener("mousemove", e => {
   d3.select("html").style("background-position-x", +e.offsetX / 10.0 + "px");
   d3.select("html").style("background-position-y", +e.offsetY / 10.0 + "px");
 });
 
 fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
-  .then(function(response) {
+  .then(function (response) {
     return response.json();
   })
-  .then(function(raw) {
+  .then(function (raw) {
     console.log("Infection Data from Sina", raw);
     raw.data.list.forEach(prov => {
       let special = {
@@ -104,7 +111,7 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
             .attr("viewBox", [0, 0, 875, 910])
 
           const g = svg.append("g")
-            
+
           g.attr("id", "geo-paths")
             .selectAll("path")
             .data(topoData)
@@ -114,9 +121,10 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
               let cut = altSubstr(d.properties.NAME);
               if (cut in data) {
                 data[cut].used = true;
-                return style.paint(formula(cut, d.properties));
+                console.log(style.paint(formula(cut, d.properties)))
+                return style.paint(formula(cut, d.properties)) || DIM_COLOR;
               }
-              return "#222";
+              return DIM_COLOR;
             })
             .attr("d", path)
             .on("mouseover", d => {
@@ -124,7 +132,7 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
               d3.select(".city-name").text(d.properties.NAME);
               if (cut in data) {
                 d3.select(".rate").text(
-                  formula(cut, d.properties).toFixed(method.properties.toFixed)
+                  deNaN(formula(cut, d.properties).toFixed(method.properties.toFixed))
                 );
               } else {
                 d3.select(".rate").text(0);
@@ -146,10 +154,10 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
               resetRegion();
             });
 
-            const zoom = d3.zoom().scaleExtent([0.5, 8]).on('zoom', () => {
-              g.attr('transform', d3.event.transform);
-            });
-            svg.call(zoom)
+          const zoom = d3.zoom().scaleExtent([0.5, 8]).on('zoom', () => {
+            g.attr('transform', d3.event.transform);
+          });
+          svg.call(zoom)
 
           for (let city in data) {
             if (!data[city].used) console.warn("Unused city", city);
@@ -169,11 +177,14 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
             formula: (cut, dProp) => data[cut].conNum / population.get(cut),
             dataDefault: +raw.data.gntotal / 138000,
             style: {
-              paint: d3
-                .scalePow()
-                .interpolate(() => d3.interpolateInferno)
-                .exponent(0.25)
-                .domain([0, 15]),
+              paint: value => {
+                if (value === 0) return DIM_COLOR
+                return d3
+                  .scalePow()
+                  .interpolate(() => d3.interpolateInferno)
+                  .exponent(0.2)
+                  .domain([0, 60])(value)
+              },
               interpolation: d3.interpolateInferno
             },
             properties: {
@@ -187,11 +198,14 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
             formula: (cut, dProp) => data[cut].conNum / dProp.Shape_Area,
             dataDefault: +raw.data.gntotal / 960,
             style: {
-              paint: d3
-                .scalePow()
-                .interpolate(() => d3.interpolateViridis)
-                .exponent(0.3)
-                .domain([0, 6500]),
+              paint: value => {
+                if (value === 0) return DIM_COLOR
+                return d3
+                  .scalePow()
+                  .interpolate(() => d3.interpolateViridis)
+                  .exponent(0.3)
+                  .domain([0, 6500])(value)
+              },
               interpolation: d3.interpolateViridis
             },
             properties: {
@@ -205,11 +219,14 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
             formula: (cut, dProp) => +data[cut].conNum,
             dataDefault: +raw.data.gntotal,
             style: {
-              paint: d3
-                .scalePow()
-                .interpolate(() => d3.interpolateCividis)
-                .exponent(0.3)
-                .domain([0, 6500]),
+              paint: value => {
+                if (value === 0) return DIM_COLOR
+                return d3
+                  .scalePow()
+                  .interpolate(() => d3.interpolateCividis)
+                  .exponent(0.3)
+                  .domain([0, 6500])(value)
+              },
               interpolation: d3.interpolateCividis
             },
             properties: {
@@ -276,6 +293,6 @@ fetchJsonp("https://interface.sina.cn/news/wap/fymap2020_data.d.json")
         document.querySelector('label[for="ratio"]').click();
       });
   })
-  .catch(function(ex) {
+  .catch(function (ex) {
     console.log("parsing failed", ex);
   });
