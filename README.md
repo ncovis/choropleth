@@ -2,11 +2,11 @@
 
 ### About
 
-Visualization of the Novel Coronavirus outbreak in Wuhan, China. [Demo here](https://ncovis.github.io/choropleth/).
+[Demo here](https://ncovis.github.io/choropleth/).
 
-Compared with other existing visualization projects for nCoV-2019, nCoVis Choropleth collects and visualizes data of prefecture-level cities (instead of provinces), as well as other indicators such as infection density (infections per km²) and infection ratio (%).
+This project was initiated in January 2020. Compared with other existing visualizations of COVID-19 during that time, nCoVis Choropleth collects and visualizes data at the granularity of prefecture-level cities instead of provinces. It also includes several derivative indicators such as infection density (infections per km²) and infection ratio (%) for the first time.
 
-From July 17 2020, the project will be visualizing global data instead. You can still access the legacy verion (the Chinese prefecture-level cities map) through the link provided in the page.
+From July 17 2020, nCoVis will be visualizing global data instead. You can still access the legacy version (the Chinese prefecture-level cities map) through the link provided in the page.
 
 ![Preview](https://i.imgur.com/n9hVX6a.jpg "Preview")
 
@@ -14,7 +14,7 @@ From July 17 2020, the project will be visualizing global data instead. You can 
 
 ### Contributing
 
-This repo looks like a mess, because some random bugs in ParcelJS made ugly workarounds for branch and file structrues inevitable. You wouldn't want to do that. 🤦
+This repo looks like a mess, because some random bugs in ParcelJS made ugly workarounds for branch and file structures inevitable. You wouldn't want to do that. 🤦
 
 ### Start Building
 
